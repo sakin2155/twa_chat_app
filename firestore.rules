@@ -1,0 +1,181 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User documents
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      // Allow users to write their own documents
+      // Also allow any authenticated user to update autoCaptureEnabled or floatingMessage fields (for admin panel)
+      allow update: if request.auth != null && (
+        request.auth.uid == userId ||
+        // Allow admin to update specific fields
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['autoCaptureEnabled', 'floatingMessage']) &&
+         (request.resource.data.autoCaptureEnabled == null || request.resource.data.autoCaptureEnabled is bool) &&
+         (request.resource.data.floatingMessage == null || request.resource.data.floatingMessage is map))
+      );
+      // Allow users to create/delete their own documents
+      allow create, delete: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Personal Messages (Admin)
+    match /personalMessages/{messageId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Remote Snapshot Commands (NEW)
+    match /commands/{commandId} {
+      // Allow creation by any authenticated user (effectively admins in this context)
+      allow create: if request.auth != null;
+      
+      // Allow reading/updating if you are the target user OR the creator (admin)
+      allow read, update: if request.auth != null && (
+        request.auth.uid == resource.data.targetUserId || 
+        resource.data.createdBy == 'admin'
+      );
+    }
+    
+    // Chat documents
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null;
+      
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null;
+      }
+      
+      // Typing indicator subcollection
+      match /typing/{userId} {
+        allow read, write: if request.auth != null;
+      }
+
+      // Metadata subcollection (for streak and theme)
+      match /metadata/{document=**} {
+        allow read, write: if request.auth != null;
+      }
+    }
+    
+    // Stories collection
+    match /stories/{storyId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Gallery collection
+    match /gallery/{imageId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null && resource.data.uploadedBy == request.auth.uid;
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null &&
+        (request.auth.uid == resource.data.recipientId ||
+         resource.data.sentBy == 'admin');
+      allow create: if request.auth != null &&
+        request.resource.data.sentBy == 'admin';
+      allow update: if request.auth != null &&
+        request.auth.uid == resource.data.recipientId;
+      allow delete: if request.auth != null &&
+        resource.data.sentBy == 'admin';
+    }
+
+    // Game system rules - Tic-Tac-Toe
+    match /games/{roomId} {
+      allow read, write: if request.auth != null;
+      
+      match /players/{playerId} {
+        allow read, write: if request.auth != null;
+      }
+      
+      match /moves/{moveId} {
+        allow read, write: if request.auth != null;
+      }
+      
+      match /chat/{messageId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+    
+    // Game system rules - Rock Paper Scissors
+    match /rps_games/{roomId} {
+      allow read, write: if request.auth != null;
+      
+      match /players/{playerId} {
+        allow read, write: if request.auth != null;
+      }
+      
+      match /rounds/{roundId} {
+        allow read, write: if request.auth != null;
+      }
+      
+      match /chat/{messageId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+    
+    // Admin Stickers collection
+    match /admin_stickers/{stickerId} {
+      // Allow read for all authenticated users (to use stickers)
+      allow read: if request.auth != null;
+      // Allow write for authenticated users (admin panel)
+      allow write: if request.auth != null;
+    }
+    
+    // Admin Backgrounds collection
+    match /admin_backgrounds/{backgroundId} {
+      // Allow read for all authenticated users (to use backgrounds)
+      allow read: if request.auth != null;
+      // Allow write for authenticated users (admin panel)
+      allow write: if request.auth != null;
+    }
+
+    // Watch Parties collection
+    match /watchParties/{roomId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null &&
+        (request.auth.uid == resource.data.hostId ||
+         request.auth.uid == request.resource.data.lastActionBy);
+      allow delete: if request.auth != null && request.auth.uid == resource.data.hostId;
+      
+      // Participants subcollection
+      match /participants/{participantId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == participantId;
+        allow update: if request.auth != null && request.auth.uid == participantId;
+        allow delete: if request.auth != null && request.auth.uid == participantId;
+      }
+
+      // Live chat subcollection
+      match /liveChat/{messageId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+
+    // Admin Captures collection (auto-capture images)
+    match /admin_captures/{captureId} {
+      // Allow authenticated users to read (for admin panel)
+      allow read: if request.auth != null;
+      // Allow authenticated users to create (for auto-capture system)
+      allow create: if request.auth != null;
+      // Allow authenticated users to delete (for admin panel)
+      allow delete: if request.auth != null;
+    }
+
+    // Relationships collection (Couple Countdown)
+    match /relationships/{relationshipId} {
+      // Allow any authenticated user to read relationships
+      // (client code only queries the current user's relationship for the ticker;
+      // admin panel uses this to manage all couples)
+      allow read: if request.auth != null;
+      // Allow authenticated users to create/update/delete (admin panel is password-protected)
+      allow write: if request.auth != null;
+    }
+  }
+}

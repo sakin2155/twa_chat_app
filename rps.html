@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rock Paper Scissors</title>
+    <link rel="stylesheet" href="rps.css">
+</head>
+<body>
+    <!-- Global Loading Screen -->
+    <div id="global-loading" class="global-loading">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container" class="game-container hidden">
+        <!-- Main Game Section -->
+        <div class="game-main">
+            <!-- Header -->
+            <div class="game-header">
+                <button id="back-to-chat-btn" class="back-btn" title="Back to Chat">← Back</button>
+                <h1>✂️ Rock Paper Scissors</h1>
+                <div class="header-spacer"></div>
+            </div>
+
+            <!-- Status Board -->
+            <div class="status-board">
+                <div class="player-info player-1">
+                    <div class="player-avatar" id="player-1-avatar">?</div>
+                    <div class="player-details">
+                        <div class="player-name" id="player-1-name">Player 1</div>
+                        <div class="player-score" id="player-1-score">0</div>
+                    </div>
+                </div>
+
+                <div class="vs-divider">VS</div>
+
+                <div class="player-info player-2">
+                    <div class="player-avatar" id="player-2-avatar">?</div>
+                    <div class="player-details">
+                        <div class="player-name" id="player-2-name">Player 2</div>
+                        <div class="player-score" id="player-2-score">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Waiting Screen -->
+            <div id="waiting-screen" class="waiting-screen">
+                <div class="waiting-content">
+                    <div class="spinner"></div>
+                    <p>Waiting for opponent to join...</p>
+                </div>
+            </div>
+
+            <!-- Game Board -->
+            <div id="game-board" class="game-board hidden">
+                <!-- Status -->
+                <div class="game-status">
+                    <p id="status-text">Make your choice!</p>
+                </div>
+
+                <!-- Choices -->
+                <div class="choices-container">
+                    <button class="choice-btn" data-choice="rock" id="rock-btn">
+                        <span class="choice-emoji">🪨</span>
+                        <span class="choice-label">Rock</span>
+                    </button>
+                    <button class="choice-btn" data-choice="paper" id="paper-btn">
+                        <span class="choice-emoji">📄</span>
+                        <span class="choice-label">Paper</span>
+                    </button>
+                    <button class="choice-btn" data-choice="scissors" id="scissors-btn">
+                        <span class="choice-emoji">✂️</span>
+                        <span class="choice-label">Scissors</span>
+                    </button>
+                </div>
+
+                <!-- Result Display -->
+                <div id="result-display" class="result-display hidden">
+                    <div class="result-content">
+                        <div class="player-choice">
+                            <p>You chose:</p>
+                            <p class="choice-text" id="your-choice">Rock</p>
+                        </div>
+                        <div class="vs-text">VS</div>
+                        <div class="opponent-choice">
+                            <p>Opponent chose:</p>
+                            <p class="choice-text" id="opponent-choice">Paper</p>
+                        </div>
+                    </div>
+                    <div class="result-message" id="result-message">You Lost!</div>
+                    <button id="play-again-btn" class="play-again-btn">Play Again</button>
+                </div>
+
+                <!-- Score -->
+                <div class="score-display">
+                    <div class="score-item">
+                        <span class="score-label">Wins</span>
+                        <span class="score-value" id="wins-count">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">Losses</span>
+                        <span class="score-value" id="losses-count">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">Draws</span>
+                        <span class="score-value" id="draws-count">0</span>
+                    </div>
+                </div>
+
+                <!-- In-Game Chat -->
+                <div class="chat-section">
+                    <div class="chat-header">
+                        <h3>Chat</h3>
+                    </div>
+                    <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-input-container">
+                        <textarea id="chat-input" class="chat-input" placeholder="Type a message..." rows="1"></textarea>
+                        <button id="send-chat-btn" class="send-chat-btn">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module" src="rps.js"></script>
+</body>
+</html>

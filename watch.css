@@ -1,0 +1,589 @@
+:root {
+    font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color-scheme: dark;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: radial-gradient(circle at top, #1f1b2e, #0b0a11 60%);
+    color: #f5f5f5;
+    min-height: 100vh;
+    padding: 32px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.global-loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 10, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #a855f7;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 12px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.watch-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.watch-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 18px 24px;
+}
+
+.watch-header-info h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.watch-header-info p {
+    margin: 4px 0 0;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 14px;
+}
+
+.watch-header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.back-btn,
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.danger-btn {
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 10px 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.back-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: white;
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+}
+
+.ghost-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.danger-btn {
+    background: rgba(244, 63, 94, 0.15);
+    border: 1px solid rgba(244, 63, 94, 0.4);
+    color: #ff8fa3;
+}
+
+.back-btn:hover,
+.primary-btn:hover,
+.secondary-btn:hover,
+.ghost-btn:hover,
+.danger-btn:hover {
+    transform: translateY(-1px);
+}
+
+.watch-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.video-section {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.youtube-player {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #050505;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.sync-status {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.watch-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.watch-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.sidebar-card {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 18px;
+}
+
+.sidebar-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.pill {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+
+.subtle-pill {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 12px;
+}
+
+.chat-card {
+    gap: 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages-wrapper {
+    position: relative;
+    min-height: 220px;
+}
+
+.chat-messages {
+    max-height: 320px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+}
+
+.chat-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 14px;
+    padding: 0 12px;
+    pointer-events: none;
+}
+
+.chat-empty.hidden {
+    display: none;
+}
+
+.chat-message {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 14px;
+    border-radius: 16px;
+    max-width: 86%;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 6px 18px rgba(5, 5, 15, 0.3);
+}
+
+.chat-message.own {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(79, 70, 229, 0.85));
+    align-self: flex-end;
+}
+
+.chat-message-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.chat-message.own .chat-message-header {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.chat-message-body {
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.chat-input {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.chat-input textarea {
+    flex: 1 1 auto;
+    resize: none;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 14px;
+    max-height: 120px;
+    line-height: 1.4;
+    font-family: inherit;
+    min-height: 42px;
+}
+
+.chat-input textarea:focus {
+    outline: none;
+}
+
+.chat-send-btn {
+    flex-shrink: 0;
+    min-width: 96px;
+}
+
+.participants-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.participant-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.participant-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.participant-name {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.participant-role {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.activity-log {
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.activity-entry {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.session-ended {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 10, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2100;
+}
+
+.session-ended-card {
+    padding: 32px;
+    border-radius: 24px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+    max-width: 320px;
+}
+
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 10px 24px;
+    z-index: 2200;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2300;
+}
+
+.modal-content {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 24px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 360px;
+}
+
+.leave-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 10, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2150;
+}
+
+.leave-modal-card {
+    width: min(420px, calc(100% - 32px));
+    background: rgba(7, 7, 12, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.leave-modal-header h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.leave-modal-header p {
+    margin: 8px 0 0;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.leave-modal-body h4 {
+    margin: 0 0 12px;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.leave-participants-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.leave-participant-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.leave-participant-name {
+    font-weight: 600;
+}
+
+.leave-participant-role {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.full-width {
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    body {
+        padding: 16px;
+    }
+
+    .watch-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .watch-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .watch-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .chat-messages {
+        max-height: 260px;
+    }
+
+    .watch-sidebar {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .sidebar-card {
+        flex: 1 1 320px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 12px;
+    }
+
+    .watch-container {
+        gap: 16px;
+    }
+
+    .watch-header {
+        padding: 16px;
+    }
+
+    .watch-controls {
+        flex-direction: column;
+    }
+
+    .watch-sidebar {
+        flex-direction: column;
+    }
+
+    .video-section,
+    .sidebar-card {
+        border-radius: 18px;
+    }
+
+    .chat-input textarea {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .chat-send-btn {
+        flex: 0 0 auto;
+        width: auto;
+        margin-top: 6px;
+        margin-left: auto;
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 640px) {
+    .watch-header-info h1 {
+        font-size: 18px;
+    }
+
+    .watch-header-info p {
+        font-size: 13px;
+    }
+
+    .watch-controls button {
+        width: 100%;
+    }
+
+    .video-section {
+        padding: 16px;
+    }
+
+    .sidebar-card {
+        padding: 16px;
+    }
+
+    .watch-controls {
+        gap: 8px;
+    }
+
+    .watch-header-actions {
+        gap: 8px;
+    }
+}
+
+
+
+

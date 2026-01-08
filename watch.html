@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Watch Party</title>
+    <link rel="stylesheet" href="watch.css">
+</head>
+
+<body>
+    <div id="global-loading" class="global-loading">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Connecting to watch party…</p>
+        </div>
+    </div>
+
+    <main id="watch-container" class="watch-container hidden">
+        <header class="watch-header">
+            <button id="back-to-chat-btn" class="back-btn" title="Back to chat">← Chat</button>
+            <div class="watch-header-info">
+                <h1 id="watch-video-title">Watch Party</h1>
+                <p id="watch-host-line">Hosted by —</p>
+            </div>
+            <div class="watch-header-actions">
+                <button id="copy-invite-btn" class="secondary-btn">Copy Invite</button>
+                <button id="end-watch-btn" class="danger-btn hidden">End Session</button>
+            </div>
+        </header>
+
+        <section class="watch-layout">
+            <div class="video-section">
+                <div id="youtube-player" class="youtube-player"></div>
+                <div id="sync-status" class="sync-status">Waiting for host…</div>
+                <div class="watch-controls">
+                    <button id="play-toggle-btn" class="primary-btn">Play / Pause</button>
+                    <button id="sync-now-btn" class="ghost-btn">Sync to Host</button>
+                </div>
+            </div>
+            <aside class="watch-sidebar">
+                <div class="sidebar-card chat-card">
+                    <div class="sidebar-card-header">
+                        <h3>Live Chat</h3>
+                        <span class="pill subtle-pill">Stay synced</span>
+                    </div>
+                    <div class="chat-messages-wrapper">
+                        <div id="watch-chat-messages" class="chat-messages"></div>
+                        <div id="watch-chat-empty" class="chat-empty">
+                            <p>Say hi to your watch buddy while the video plays.</p>
+                            <small>Messages stay inside this watch party.</small>
+                        </div>
+                    </div>
+                    <form id="watch-chat-form" class="chat-input" autocomplete="off">
+                        <textarea id="watch-chat-input" rows="1" placeholder="Type a message…" aria-label="Watch chat input"></textarea>
+                        <button id="watch-chat-send-btn" type="submit" class="primary-btn chat-send-btn">Send</button>
+                    </form>
+                </div>
+                <div class="sidebar-card">
+                    <div class="sidebar-card-header">
+                        <h3>Participants</h3>
+                        <span id="participant-count" class="pill">0</span>
+                    </div>
+                    <div id="participants-list" class="participants-list"></div>
+                </div>
+                <div class="sidebar-card">
+                    <div class="sidebar-card-header">
+                        <h3>Activity</h3>
+                    </div>
+                    <div id="activity-log" class="activity-log"></div>
+                </div>
+            </aside>
+        </section>
+    </main>
+
+    <div id="participant-leave-modal" class="leave-modal hidden">
+        <div class="leave-modal-card">
+            <div class="leave-modal-header">
+                <h2 id="participant-leave-title">Someone left the watch party</h2>
+                <p id="participant-leave-message">You can stay or leave the session.</p>
+            </div>
+            <div class="leave-modal-body">
+                <h4>Still connected</h4>
+                <div id="participant-leave-list" class="leave-participants-list"></div>
+            </div>
+            <button id="leave-session-btn" class="danger-btn full-width">Leave Watch Party</button>
+        </div>
+    </div>
+
+    <div id="session-ended" class="session-ended hidden">
+        <div class="session-ended-card">
+            <h2>Session Ended</h2>
+            <p id="session-ended-message">This watch party is no longer active.</p>
+            <button id="session-back-btn" class="primary-btn">Back to Chat</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Sign in required</h2>
+            <p>You need to sign in through the main app to join the watch party.</p>
+            <button id="go-to-login-btn" class="primary-btn">Go to Login</button>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script type="module" src="watch.js"></script>
+</body>
+
+</html>
+
+
+
