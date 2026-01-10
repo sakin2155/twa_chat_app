@@ -3,7 +3,7 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.mcrypt.app",
+      "package_name": "com.calculator.app",
       "sha256_cert_fingerprints": [
         "PLACEHOLDER: Replace this with your keystore SHA-256 fingerprint"
       ]
