@@ -3527,6 +3527,7 @@ function openStoryFromReply(storyId, userId) {
         // Show viewer
         if (storyViewer) {
             storyViewer.classList.remove('hidden');
+            document.getElementById('user-list-container')?.classList.add('story-viewer-open');
         }
 
         // Show specific story
@@ -3545,6 +3546,7 @@ function openStorySequence(userId) {
     stopStoryProgress();
     if (storyViewer) {
         storyViewer.classList.remove('hidden');
+        document.getElementById('user-list-container')?.classList.add('story-viewer-open');
     }
     showStoryAtIndex(activeStoryIndex);
 }
@@ -3650,6 +3652,7 @@ function navigateStory(direction) {
 function closeStoryViewer() {
     if (storyViewer) {
         storyViewer.classList.add('hidden');
+        document.getElementById('user-list-container')?.classList.remove('story-viewer-open');
     }
     // Clear media content to stop video playback
     if (storyViewerMediaContainer) {

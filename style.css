@@ -8228,6 +8228,10 @@ video.story-viewer-media {
     backdrop-filter: blur(5px);
 }
 
+.user-list-container.story-viewer-open .user-list-footer {
+    display: none;
+}
+
 .story-reply-container input::placeholder {
     color: rgba(255, 255, 255, 0.6);
 }
