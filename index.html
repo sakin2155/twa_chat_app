@@ -95,8 +95,10 @@
                         </button>
                         <div id="couple-countdown-ticker" class="couple-countdown-ticker hidden">
                             <span class="heart-icon">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M12 21s-6.716-4.35-9.428-8.06c-2.366-3.223-.475-7.327 2.63-8.407 2.324-.82 4.69.228 6.07 2.192 1.379-1.964 3.746-3.012 6.07-2.192 3.105 1.08 4.996 5.184 2.63 8.407C18.716 16.65 12 21 12 21Z"/>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path
+                                        d="M12 21s-6.716-4.35-9.428-8.06c-2.366-3.223-.475-7.327 2.63-8.407 2.324-.82 4.69.228 6.07 2.192 1.379-1.964 3.746-3.012 6.07-2.192 3.105 1.08 4.996 5.184 2.63 8.407C18.716 16.65 12 21 12 21Z" />
                                 </svg>
                             </span>
                             <span id="countdown-text">0d</span>
@@ -716,7 +718,6 @@
     <div id="story-viewer" class="story-viewer hidden">
         <div class="story-viewer-backdrop"></div>
         <div class="story-viewer-content">
-            <button id="story-viewer-close" class="story-viewer-close">×</button>
             <div class="story-progress" id="story-progress"></div>
             <div class="story-viewer-header">
                 <div class="story-viewer-user">
@@ -727,6 +728,7 @@
                     </div>
                 </div>
                 <div class="story-viewer-controls">
+                    <button id="story-viewer-close" class="story-viewer-close">×</button>
                     <button id="story-prev-btn" class="story-nav-btn">‹</button>
                     <button id="story-next-btn" class="story-nav-btn">›</button>
                 </div>
@@ -734,9 +736,19 @@
             <div id="story-viewer-media-container" class="story-viewer-media-container">
                 <!-- Will be dynamically populated with <img> or <video> -->
             </div>
-            <div class="story-viewer-footer">
-                <button id="story-like-btn" class="story-like-btn">♡</button>
-                <span id="story-like-count" class="story-like-count">0 likes</span>
+            <div class="story-reply-container">
+                <div class="story-like-container">
+                    <button id="story-like-btn" class="story-like-btn">♡</button>
+                    <span id="story-like-count" class="story-like-count">0</span>
+                </div>
+                <input type="text" id="story-reply-input" placeholder="Send message..." autocomplete="off">
+                <button id="story-reply-btn" class="story-reply-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -795,7 +807,8 @@
             <img id="floating-persona-avatar" class="floating-persona-avatar" src="" alt="Persona Avatar">
         </div>
         <div class="floating-persona-bubble-wrapper">
-            <button id="floating-persona-close" class="floating-persona-close" aria-label="Close Persona Message">&times;</button>
+            <button id="floating-persona-close" class="floating-persona-close"
+                aria-label="Close Persona Message">&times;</button>
             <div class="floating-persona-bubble">
                 <div id="floating-persona-text" class="floating-persona-text"></div>
             </div>

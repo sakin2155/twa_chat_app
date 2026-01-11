@@ -27,7 +27,8 @@ import {
     serverTimestamp,
     Timestamp,
     arrayUnion,
-    arrayRemove
+    arrayRemove,
+    increment
 } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js';
 
@@ -268,6 +269,9 @@ const storyViewerClose = document.getElementById('story-viewer-close');
 const storyViewerName = document.getElementById('story-viewer-name');
 const storyViewerTime = document.getElementById('story-viewer-time');
 const storyViewerAvatar = document.getElementById('story-viewer-avatar');
+const storyReplyInput = document.getElementById('story-reply-input');
+const storyReplyBtn = document.getElementById('story-reply-btn');
+const storyReplyContainer = document.querySelector('.story-reply-container');
 const storyPrevBtn = document.getElementById('story-prev-btn');
 const storyNextBtn = document.getElementById('story-next-btn');
 const storyProgressEl = document.getElementById('story-progress');
@@ -1907,6 +1911,17 @@ function loadMessages() {
             markMessagesAsSeen();
         }, 200), passiveOptions);
         messagesContainer._scrollListenerAdded = true;
+
+        // Prevent browser context menu on long-press for all media elements (images, stickers, GIFs)
+        // Using event delegation for dynamically added content
+        messagesContainer.addEventListener('contextmenu', (e) => {
+            const mediaElement = e.target.closest('.message-sticker, .message-image, img');
+            if (mediaElement) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
     }
 }
 
@@ -2172,7 +2187,24 @@ function createMessageElement(messageData) {
 
     let replyHtml = '';
     let hasReply = false;
-    if (!isDeleted && messageData.replyTo) {
+    if (!isDeleted && messageData.type === 'story-reply' && messageData.storyReply) {
+        hasReply = true;
+        const s = messageData.storyReply;
+        const mediaTag = s.type === 'video'
+            ? `<video src="${s.url}" style="width: 100%; height: 100%; object-fit: cover;"></video>`
+            : `<img src="${s.url}" style="width: 100%; height: 100%; object-fit: cover;">`;
+
+        replyHtml = `
+            <div class="reply-bubble reply-story" data-story-id="${s.id}" data-story-owner-id="${s.userId || (isOwnMessage ? (typeof currentChatUser !== 'undefined' && currentChatUser ? currentChatUser.uid : '') : currentUser.uid)}" style="display: flex; align-items: center; gap: 8px; padding: 4px; margin-bottom: 4px; background: rgba(125, 125, 125, 0.1); border-left: 2px solid rgba(255,255,255,0.5); border-radius: 4px; cursor: pointer;">
+                <div class="reply-context-media-preview" style="width: 30px; height: 45px; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
+                    ${mediaTag}
+                </div>
+                <div class="reply-bubble-content">
+                    <div class="reply-bubble-name" style="font-size: 10px; opacity: 0.7; margin-bottom: 2px;">Replied to story</div>
+                </div>
+            </div>
+        `;
+    } else if (!isDeleted && messageData.replyTo) {
         hasReply = true;
         const replyName = messageData.replyTo.senderName || 'Unknown';
         const replyText = messageData.replyTo.text || '[Message]';
@@ -2406,6 +2438,15 @@ function createMessageElement(messageData) {
             }
         }
 
+        // Prevent browser context menu on long-press for images, stickers, and GIFs
+        if (mediaElement) {
+            mediaElement.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            });
+        }
+
         if (targetElement) {
             if (isReceivedMessage) {
                 targetElement.addEventListener('dblclick', (e) => {
@@ -2416,7 +2457,7 @@ function createMessageElement(messageData) {
                     longPressTimer = setTimeout(() => {
                         showReactionPopup(e, messageData.id);
                     }, 400);
-                });
+                }, { passive: true });
 
                 targetElement.addEventListener('touchend', () => {
                     clearTimeout(longPressTimer);
@@ -2440,7 +2481,7 @@ function createMessageElement(messageData) {
                             // but the key is handling touchend
                         }
                     }, 400);
-                });
+                }, { passive: true });
 
                 targetElement.addEventListener('touchend', (e) => {
                     clearTimeout(longPressTimer);
@@ -2452,7 +2493,7 @@ function createMessageElement(messageData) {
 
                 targetElement.addEventListener('touchmove', () => {
                     clearTimeout(longPressTimer);
-                });
+                }, { passive: true });
             }
         }
 
@@ -2465,7 +2506,7 @@ function createMessageElement(messageData) {
             touchStartY = e.touches[0].clientY;
             isSwiping = false;
             div.style.transition = 'none';
-        });
+        }, { passive: true });
 
         div.addEventListener('touchmove', (e) => {
             if (!touchStartX) return;
@@ -2540,34 +2581,56 @@ function createMessageElement(messageData) {
 
         const replyBubble = div.querySelector('.reply-bubble');
         if (replyBubble) {
-            const jumpToSource = () => {
-                const toId = replyBubble.getAttribute('data-reply-to');
-                const target = document.querySelector(`.message[data-message-id="${toId}"]`);
-                if (target) {
-                    // Smooth scroll to the source message
-                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (replyBubble.classList.contains('reply-story')) {
+                const openStory = () => {
+                    const storyId = replyBubble.dataset.storyId;
+                    const blockOwnerId = replyBubble.dataset.storyOwnerId;
+                    if (storyId && blockOwnerId && typeof openStoryFromReply === 'function') {
+                        openStoryFromReply(storyId, blockOwnerId);
+                    }
+                };
 
-                    // Add highlight animation
-                    target.classList.add('highlight-replied');
+                replyBubble.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openStory();
+                });
 
-                    // Remove highlight after animation completes
-                    setTimeout(() => target.classList.remove('highlight-replied'), 1500);
-                } else {
-                    // Message not found - could be deleted or not loaded
-                    console.warn('Source message not found:', toId);
-                }
-            };
+                replyBubble.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openStory();
+                    }
+                });
+            } else {
+                const jumpToSource = () => {
+                    const toId = replyBubble.getAttribute('data-reply-to');
+                    const target = document.querySelector(`.message[data-message-id="${toId}"]`);
+                    if (target) {
+                        // Smooth scroll to the source message
+                        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // Click handler
-            replyBubble.addEventListener('click', jumpToSource);
+                        // Add highlight animation
+                        target.classList.add('highlight-replied');
 
-            // Keyboard support (Enter and Space)
-            replyBubble.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    jumpToSource();
-                }
-            });
+                        // Remove highlight after animation completes
+                        setTimeout(() => target.classList.remove('highlight-replied'), 1500);
+                    } else {
+                        // Message not found - could be deleted or not loaded
+                        console.warn('Source message not found:', toId);
+                    }
+                };
+
+                // Click handler
+                replyBubble.addEventListener('click', jumpToSource);
+
+                // Keyboard support (Enter and Space)
+                replyBubble.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        jumpToSource();
+                    }
+                });
+            }
         }
 
         if (isMediaMessage(messageData) && messageData.imgUrl) {
@@ -3443,6 +3506,36 @@ function renderStories(stories = []) {
     }
 }
 
+function openStoryFromReply(storyId, userId) {
+    // Check if stories are loaded for this user
+    if (!storiesByUser.has(userId)) {
+        // In a real app we might want to fetch them here if not loaded
+        // For now, assume if not in memory, they might be expired or not loaded
+        console.warn('Stories not in memory for user:', userId);
+        showNotification('Story might have expired', 2000);
+        return;
+    }
+
+    const userStories = storiesByUser.get(userId);
+    const storyIndex = userStories.findIndex(s => s.id === storyId);
+
+    if (storyIndex !== -1) {
+        // Set global state
+        activeStoryUserId = userId;
+        activeStorySequence = userStories;
+
+        // Show viewer
+        if (storyViewer) {
+            storyViewer.classList.remove('hidden');
+        }
+
+        // Show specific story
+        showStoryAtIndex(storyIndex);
+    } else {
+        showNotification('Story no longer available', 2000);
+    }
+}
+
 function openStorySequence(userId) {
     if (!storiesByUser.has(userId)) return;
     activeStorySequence = storiesByUser.get(userId);
@@ -3464,6 +3557,15 @@ function showStoryAtIndex(index) {
     stopStoryProgress();
     activeStoryIndex = index;
     const story = activeStorySequence[index];
+
+    // Hide reply input for own stories
+    if (storyReplyContainer) {
+        if (currentUser && story.userId === currentUser.uid) {
+            storyReplyContainer.classList.add('hidden');
+        } else {
+            storyReplyContainer.classList.remove('hidden');
+        }
+    }
 
     // Render appropriate media element
     if (storyViewerMediaContainer) {
@@ -3548,6 +3650,10 @@ function navigateStory(direction) {
 function closeStoryViewer() {
     if (storyViewer) {
         storyViewer.classList.add('hidden');
+    }
+    // Clear media content to stop video playback
+    if (storyViewerMediaContainer) {
+        storyViewerMediaContainer.innerHTML = '';
     }
     stopStoryProgress();
     updateStoryLikeUI(null);
@@ -3635,7 +3741,7 @@ function updateStoryLikeUI(story) {
     storyLikeBtn.disabled = !currentUser;
     storyLikeBtn.classList.toggle('liked', isLiked);
     storyLikeBtn.textContent = isLiked ? '♥' : '♡';
-    storyLikeCountEl.textContent = likes.length === 1 ? '1 like' : `${likes.length} likes`;
+    storyLikeCountEl.textContent = likes.length;
 }
 
 async function toggleStoryLike() {
@@ -3657,9 +3763,106 @@ async function toggleStoryLike() {
             story.likes = [...likes, currentUser.uid];
         }
         updateStoryLikeUI(story);
+        updateStoryLikeUI(story);
     } catch (error) {
         console.error('Error toggling like:', error);
     }
+}
+
+async function sendStoryReply() {
+    if (!storyReplyInput || !activeStorySequence || !activeStorySequence[activeStoryIndex]) return;
+
+    const text = storyReplyInput.value.trim();
+    if (!text) return;
+
+    const story = activeStorySequence[activeStoryIndex];
+    if (!story.userId || !currentUser) return;
+
+    // Don't allow replying to own story
+    if (story.userId === currentUser.uid) return;
+
+    const targetChatId = getChatId(currentUser.uid, story.userId);
+
+    const originalText = text;
+    storyReplyInput.value = '';
+    storyReplyInput.blur(); // Close keyboard
+    storyReplyBtn.disabled = true;
+
+    try {
+        const messagesRef = collection(db, 'chats', targetChatId, 'messages');
+
+        await addDoc(messagesRef, {
+            text: text,
+            senderId: currentUser.uid,
+            timestamp: serverTimestamp(),
+            type: 'story-reply',
+            storyReply: {
+                id: story.id,
+                url: story.mediaUrl,
+                type: story.mediaType || 'image',
+                authorName: story.authorName || 'User',
+                userId: story.userId
+            },
+            seen: false,
+            isEdited: false,
+            reactions: [],
+            isDeleted: false
+        });
+
+        // Ensure chat exists/is updated
+        const chatRef = doc(db, 'chats', targetChatId);
+        const chatSnap = await getDoc(chatRef);
+
+        if (!chatSnap.exists()) {
+            await setDoc(chatRef, {
+                participants: [currentUser.uid, story.userId],
+                createdAt: serverTimestamp(),
+                lastMessage: 'Replied to story',
+                lastMessageTime: serverTimestamp(),
+                lastMessageSenderId: currentUser.uid,
+                unreadCount: { [story.userId]: 1, [currentUser.uid]: 0 }
+            });
+        } else {
+            // Update last message
+            await updateDoc(chatRef, {
+                lastMessage: 'Replied to story',
+                lastMessageTime: serverTimestamp(),
+                lastMessageSenderId: currentUser.uid,
+                [`unreadCount.${story.userId}`]: increment(1)
+            });
+        }
+
+        // Update streak if function exists
+        if (typeof updateStreakOnMessage === 'function') {
+            updateStreakOnMessage(targetChatId, currentUser.uid);
+        }
+
+        showNotification('Reply sent!', 2000);
+
+        // Resume story
+        startStoryProgress();
+
+    } catch (error) {
+        console.error('Error sending story reply:', error);
+        showNotification('Failed to send reply', 2000);
+        storyReplyInput.value = originalText;
+    } finally {
+        storyReplyBtn.disabled = false;
+    }
+}
+
+// Event Listeners for Story Reply
+if (storyReplyBtn) {
+    storyReplyBtn.addEventListener('click', sendStoryReply);
+}
+if (storyReplyInput) {
+    storyReplyInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendStoryReply();
+    });
+    storyReplyInput.addEventListener('focus', stopStoryProgress);
+    storyReplyInput.addEventListener('blur', () => {
+        if (!storyReplyInput.value) startStoryProgress();
+    });
 }
 
 function markStoryViewed(story) {
@@ -6419,7 +6622,7 @@ document.addEventListener('touchstart', (e) => {
             messageInput.removeEventListener('blur', preventBlurWhileMenuOpen);
         }
     }
-}, true);
+}, { capture: true, passive: true });
 
 
 // ===========================
