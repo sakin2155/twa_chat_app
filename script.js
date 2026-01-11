@@ -277,6 +277,7 @@ const storyNextBtn = document.getElementById('story-next-btn');
 const storyProgressEl = document.getElementById('story-progress');
 const storyLikeBtn = document.getElementById('story-like-btn');
 const storyLikeCountEl = document.getElementById('story-like-count');
+const storyViewerHeader = document.querySelector('.story-viewer-header');
 const gifModal = document.getElementById('gif-modal');
 const closeGifModalBtn = document.getElementById('close-gif-modal');
 const gifResultsEl = document.getElementById('gif-results');
@@ -3421,6 +3422,25 @@ function subscribeToStories() {
             });
         });
         renderStories(stories);
+        
+        // Update active story sequence if viewing a story for real-time likes
+        if (activeStoryUserId && activeStorySequence) {
+            const updatedUserStories = storiesByUser.get(activeStoryUserId);
+            if (updatedUserStories && updatedUserStories.length > 0) {
+                // Find and update the current story in the sequence
+                const currentStoryId = activeStorySequence[activeStoryIndex]?.id;
+                if (currentStoryId) {
+                    const updatedStory = updatedUserStories.find(s => s.id === currentStoryId);
+                    if (updatedStory) {
+                        activeStorySequence[activeStoryIndex] = updatedStory;
+                        // Update UI if viewer is open
+                        if (storyViewer && !storyViewer.classList.contains('hidden')) {
+                            updateStoryLikeUI(updatedStory);
+                        }
+                    }
+                }
+            }
+        }
     }, (error) => {
         // Suppress permission errors during logout
         if (error.code === 'permission-denied') {
@@ -3610,6 +3630,36 @@ function showStoryAtIndex(index) {
     updateStoryNavButtons();
     markStoryViewed(story);
     updateStoryLikeUI(story);
+    
+    // Show header likes count only for story owner
+    const isOwner = currentUser && story.userId === currentUser.uid;
+    if (isOwner) {
+        let headerLikes = document.getElementById('story-header-likes');
+        if (!headerLikes) {
+            headerLikes = document.createElement('div');
+            headerLikes.id = 'story-header-likes';
+            headerLikes.className = 'story-header-likes';
+            headerLikes.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21s-6.716-4.35-9.428-8.06c-2.366-3.223-.475-7.327 2.63-8.407 2.324-.82 4.69.228 6.07 2.192 1.379-1.964 3.746-3.012 6.07-2.192 3.105 1.08 4.996 5.184 2.63 8.407C18.716 16.65 12 21 12 21Z"/>
+                </svg>
+                <span id="story-total-likes-count">${(story.likes || []).length}</span>
+            `;
+            // Insert after user info
+            const userInfo = document.querySelector('.story-viewer-user');
+            if (userInfo && storyViewerHeader) {
+                storyViewerHeader.insertBefore(headerLikes, document.querySelector('.story-viewer-controls'));
+            }
+        } else {
+            headerLikes.querySelector('#story-total-likes-count').textContent = (story.likes || []).length;
+        }
+    } else {
+        const headerLikes = document.getElementById('story-header-likes');
+        if (headerLikes) {
+            headerLikes.remove();
+        }
+    }
+    
     renderStoryProgressBars();
 
     // For videos, wait for metadata to load before starting progress
@@ -3737,6 +3787,8 @@ function updateStoryLikeUI(story) {
         storyLikeBtn.classList.remove('liked');
         storyLikeBtn.textContent = '♡';
         storyLikeCountEl.textContent = '';
+        const headerLikesCount = document.getElementById('story-total-likes-count');
+        if (headerLikesCount) headerLikesCount.textContent = '0';
         return;
     }
     const likes = story.likes || [];
@@ -3745,6 +3797,10 @@ function updateStoryLikeUI(story) {
     storyLikeBtn.classList.toggle('liked', isLiked);
     storyLikeBtn.textContent = isLiked ? '♥' : '♡';
     storyLikeCountEl.textContent = likes.length;
+    
+    // Update header likes count for story owner
+    const headerLikesCount = document.getElementById('story-total-likes-count');
+    if (headerLikesCount) headerLikesCount.textContent = likes.length;
 }
 
 async function toggleStoryLike() {

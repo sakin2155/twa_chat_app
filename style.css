@@ -5291,16 +5291,17 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 1px;
+    min-width: 44px;
 }
 
 .story-like-btn {
     background: rgba(255, 255, 255, 0.1);
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    font-size: 20px;
+    font-size: 18px;
     color: #ff85c3;
     cursor: pointer;
     transition: transform 0.2s ease, background 0.2s ease;
@@ -5322,8 +5323,40 @@ body {
 
 .story-like-count {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.8);
     line-height: 1;
+    font-weight: 500;
+}
+
+.story-viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.story-viewer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.story-header-likes {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    color: #ff2d55;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.story-header-likes svg {
+    fill: currentColor;
 }
 
 .story-viewer-user {
