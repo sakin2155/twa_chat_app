@@ -45,6 +45,60 @@ a {
     -webkit-tap-highlight-color: transparent;
 }
 
+/* ===========================
+   Disable Tap Highlight on Media
+   =========================== */
+/* Remove blue tap highlight, selection, and focus effects on images, stickers, and GIFs */
+img,
+.message img,
+.message-bubble img,
+.sticker-item,
+.sticker-item img,
+.recommended-sticker,
+.recommended-sticker img,
+.story-media,
+.story-media img,
+.story-media video,
+[class*="sticker"],
+[class*="gif"],
+[class*="media"] img,
+.admin-bg-item img {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    outline: none;
+    -webkit-user-drag: none;
+    pointer-events: auto;
+}
+
+/* Remove focus outline on media elements */
+img:focus,
+.message img:focus,
+.message-bubble img:focus,
+.sticker-item:focus,
+.recommended-sticker:focus,
+[class*="sticker"]:focus,
+[class*="gif"]:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Prevent text selection highlight on media containers */
+.message-bubble,
+.sticker-container,
+.gif-container,
+.media-container {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 :root {
     --bg-dark: #000000;
     --bg-calculator: #000000;
@@ -86,7 +140,8 @@ body {
     line-height: var(--line-height-normal);
     background: var(--bg-dark);
     color: var(--text-white);
-    height: 100vh;
+    height: 100dvh;
+    /* Dynamic viewport height for mobile browsers */
     width: 100vw;
     overflow: hidden;
     display: flex;
@@ -3419,23 +3474,69 @@ body {
 .duo-partner-backdrop {
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255, 20, 147, 0.4), rgba(138, 43, 226, 0.4));
-    backdrop-filter: blur(10px);
+    background:
+        radial-gradient(ellipse at 30% 20%, rgba(255, 20, 147, 0.3), transparent 50%),
+        radial-gradient(ellipse at 70% 80%, rgba(138, 43, 226, 0.3), transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.4), transparent 70%);
+    backdrop-filter: blur(12px);
     animation: fadeIn 0.3s ease;
 }
 
 .duo-partner-content {
     position: relative;
-    background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(30, 30, 30, 0.95));
+    background: linear-gradient(145deg, rgba(25, 25, 35, 0.98), rgba(35, 35, 45, 0.98));
     padding: 60px 40px;
-    border-radius: 24px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+    border-radius: 30px;
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 60px rgba(255, 20, 147, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     max-width: 600px;
     width: 90%;
     text-align: center;
     overflow: hidden;
     animation: modalSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border: 2px solid rgba(255, 20, 147, 0.3);
+}
+
+.duo-partner-content::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 20, 147, 0.08) 0%, transparent 50%);
+    animation: rotate 20s linear infinite;
+    pointer-events: none;
+}
+
+.duo-partner-content::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 30px;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(255, 20, 147, 0.4), rgba(138, 43, 226, 0.4), rgba(255, 20, 147, 0.4));
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes modalSlideUp {
@@ -3464,24 +3565,27 @@ body {
     position: absolute;
     top: 20px;
     right: 20px;
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
-    color: #fff;
-    font-size: 32px;
-    width: 40px;
-    height: 40px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 28px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 10;
+    backdrop-filter: blur(10px);
 }
 
 .duo-partner-close:hover {
-    background: rgba(255, 20, 147, 0.3);
-    transform: rotate(90deg);
+    background: rgba(255, 20, 147, 0.4);
+    color: #fff;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 20, 147, 0.5);
 }
 
 .duo-partner-hearts {
@@ -3493,9 +3597,10 @@ body {
 
 .heart-particle {
     position: absolute;
-    font-size: 24px;
-    color: rgba(255, 20, 147, 0.6);
+    font-size: 20px;
+    color: rgba(255, 20, 147, 0.5);
     animation: float 8s infinite ease-in-out;
+    filter: drop-shadow(0 0 6px rgba(255, 20, 147, 0.4));
 }
 
 .heart-particle:nth-child(1) {
@@ -3548,12 +3653,17 @@ body {
 
 @keyframes float {
     0% {
-        transform: translateY(100vh) translateX(0) rotate(0deg);
+        transform: translateY(100vh) translateX(0) rotate(0deg) scale(0.5);
         opacity: 0;
     }
 
     10% {
         opacity: 1;
+        transform: translateY(80vh) translateX(5px) rotate(10deg) scale(0.7);
+    }
+
+    50% {
+        transform: translateY(50vh) translateX(-5px) rotate(-5deg) scale(1);
     }
 
     90% {
@@ -3561,7 +3671,7 @@ body {
     }
 
     100% {
-        transform: translateY(-100px) translateX(20px) rotate(360deg);
+        transform: translateY(-100px) translateX(10px) rotate(15deg) scale(0.8);
         opacity: 0;
     }
 }
@@ -3576,11 +3686,35 @@ body {
     align-items: center;
     justify-content: center;
     gap: 30px;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
 .duo-avatar-container {
     position: relative;
+}
+
+.duo-avatar-container::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 20, 147, 0.6), rgba(138, 43, 226, 0.6));
+    z-index: -1;
+    animation: borderPulse 3s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
 }
 
 .duo-avatar {
@@ -3594,11 +3728,24 @@ body {
     font-size: 48px;
     font-weight: 700;
     color: #fff;
-    border: 4px solid rgba(255, 20, 147, 0.5);
-    box-shadow: 0 10px 30px rgba(255, 20, 147, 0.3);
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.4),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2);
     animation: pulse 2s ease-in-out infinite;
     background-size: cover;
     background-position: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.duo-avatar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+    pointer-events: none;
 }
 
 .duo-avatar.has-image {
@@ -3621,51 +3768,85 @@ body {
 }
 
 .duo-heart-symbol {
-    font-size: 60px;
-    animation: heartBeat 1.5s ease-in-out infinite;
-    filter: drop-shadow(0 4px 8px rgba(255, 20, 147, 0.4));
+    font-size: 56px;
+    animation: heartBeat 1.5s ease-in-out infinite, glowPulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(255, 20, 147, 0.6));
+}
+
+@keyframes glowPulse {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 12px rgba(255, 20, 147, 0.6));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 25px rgba(255, 20, 147, 0.9));
+    }
 }
 
 .duo-partner-names {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 16px;
     margin-bottom: 40px;
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 26px;
+    font-weight: 700;
     color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .duo-and {
-    color: rgba(255, 20, 147, 0.8);
-    font-size: 20px;
+    color: #ff69b4;
+    font-size: 22px;
+    font-weight: 600;
+    text-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
 }
 
 .duo-countdown-display {
-    background: linear-gradient(135deg, rgba(255, 20, 147, 0.2), rgba(138, 43, 226, 0.2));
-    border: 2px solid rgba(255, 20, 147, 0.3);
-    border-radius: 20px;
-    padding: 30px;
-    margin-top: 20px;
+    background:
+        linear-gradient(135deg, rgba(255, 20, 147, 0.15), rgba(138, 43, 226, 0.15)),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent);
+    border: 1px solid rgba(255, 20, 147, 0.25);
+    border-radius: 24px;
+    padding: 35px;
+    margin-top: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+.duo-countdown-display::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 20, 147, 0.5), transparent);
 }
 
 .duo-countdown-label {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 12px;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
     font-weight: 600;
 }
 
 .duo-countdown-value {
-    font-size: 48px;
-    font-weight: 700;
-    color: #ff69b4;
+    font-size: 52px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff69b4, #da70d6, #ff1493);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-variant-numeric: tabular-nums;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     animation: countUp 0.8s ease-out;
+    text-shadow: none;
+    filter: drop-shadow(0 0 20px rgba(255, 20, 147, 0.3));
 }
 
 @keyframes countUp {
@@ -3991,32 +4172,62 @@ body {
 
 @media (max-width: 768px) {
     .duo-partner-content {
-        padding: 40px 20px;
+        padding: 45px 20px 35px;
         width: 95%;
+        border-radius: 24px;
     }
 
     .duo-avatar {
-        width: 80px;
-        height: 80px;
-        font-size: 32px;
+        width: 90px;
+        height: 90px;
+        font-size: 36px;
+        border-width: 3px;
     }
 
     .duo-heart-symbol {
-        font-size: 40px;
+        font-size: 44px;
     }
 
     .duo-partner-names {
-        font-size: 18px;
+        font-size: 20px;
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
+        margin-bottom: 30px;
+    }
+
+    .duo-and {
+        font-size: 18px;
     }
 
     .duo-countdown-value {
-        font-size: 32px;
+        font-size: 36px;
+        letter-spacing: 2px;
+    }
+
+    .duo-countdown-display {
+        padding: 25px 20px;
+        border-radius: 20px;
+    }
+
+    .duo-countdown-label {
+        font-size: 12px;
+        letter-spacing: 2px;
     }
 
     .duo-partner-avatars {
         gap: 20px;
+    }
+
+    .duo-partner-close {
+        top: 15px;
+        right: 15px;
+        width: 38px;
+        height: 38px;
+        font-size: 24px;
+    }
+
+    .heart-particle {
+        font-size: 16px;
     }
 }
 
@@ -8304,4 +8515,118 @@ video.story-viewer-media {
     height: 20px;
     transform: translateX(-1px);
     /* Optical center */
+}
+
+/* ===========================
+   Performance Optimizations
+   =========================== */
+
+/* Optimize rendering for the main chat container */
+#messages-container {
+    contain: content;
+    content-visibility: auto;
+    /* Skip rendering off-screen content */
+    contain-intrinsic-size: 1px 5000px;
+    /* Estimate size to prevent scroll jumps */
+    will-change: scroll-position;
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
+    transform: translateZ(0);
+    /* Force GPU acceleration */
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Optimize rendering for individual messages */
+.message {
+    contain: layout style;
+    will-change: transform, opacity;
+    /* Prepare for swipe animations */
+    backface-visibility: hidden;
+    /* Fix flickering during animations */
+}
+
+/* Optimization for message images and stickers */
+.message-image,
+.message-sticker {
+    transform: translateZ(0);
+    image-rendering: -webkit-optimize-contrast;
+    /* Crisper images */
+}
+
+/* User list optimization */
+.user-list,
+#user-list {
+    contain: content;
+    will-change: scroll-position;
+    -webkit-overflow-scrolling: touch;
+    transform: translateZ(0);
+}
+
+/* Input optimization */
+#message-input {
+    will-change: contents;
+    /* Optimizes typing performance */
+}
+
+/* Fix for smooth scrolling on the whole app */
+html,
+body {
+    overscroll-behavior-y: none;
+    /* Prevent pull-to-refresh interfering with app feel */
+}
+
+/* Hardware accelerate story viewer */
+.story-viewer-content {
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+}
+
+/* ===========================
+   Keyboard Sync Fix
+   =========================== */
+/* Ensure the chat app fills the dynamic viewport height to sync with keyboard */
+#chat-app {
+    height: 100dvh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.chat-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+.chat-window-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Allow messages to grow and scroll */
+#messages-container {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    /* Smooth scrolling */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure input container stays at bottom naturally via flexbox */
+.message-input-container {
+    flex-shrink: 0;
+    width: 100%;
+    background: var(--input-bg);
+    z-index: 20;
+    /* Remove any fixed positioning if present to rely on flex layout */
+    position: relative !important;
+    bottom: auto !important;
 }

@@ -3422,7 +3422,7 @@ function subscribeToStories() {
             });
         });
         renderStories(stories);
-        
+
         // Update active story sequence if viewing a story for real-time likes
         if (activeStoryUserId && activeStorySequence) {
             const updatedUserStories = storiesByUser.get(activeStoryUserId);
@@ -3630,7 +3630,7 @@ function showStoryAtIndex(index) {
     updateStoryNavButtons();
     markStoryViewed(story);
     updateStoryLikeUI(story);
-    
+
     // Show header likes count only for story owner
     const isOwner = currentUser && story.userId === currentUser.uid;
     if (isOwner) {
@@ -3659,7 +3659,7 @@ function showStoryAtIndex(index) {
             headerLikes.remove();
         }
     }
-    
+
     renderStoryProgressBars();
 
     // For videos, wait for metadata to load before starting progress
@@ -3797,7 +3797,7 @@ function updateStoryLikeUI(story) {
     storyLikeBtn.classList.toggle('liked', isLiked);
     storyLikeBtn.textContent = isLiked ? '♥' : '♡';
     storyLikeCountEl.textContent = likes.length;
-    
+
     // Update header likes count for story owner
     const headerLikesCount = document.getElementById('story-total-likes-count');
     if (headerLikesCount) headerLikesCount.textContent = likes.length;
