@@ -159,6 +159,21 @@ let floatingMessagePlayed = false;
 let floatingMessageTypewriterTimeout = null;
 
 // ===========================
+// Utility Helpers
+// ===========================
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func.apply(this, args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// ===========================
 // Auto-scroll Helper
 // ===========================
 function scrollMessagesToBottom() {
@@ -1920,12 +1935,14 @@ async function openChat(userData) {
     document.getElementById('chat-user-status').textContent = getChatHeaderStatus(userData);
     applyAvatarToElement(document.getElementById('chat-user-avatar'), userData.photoURL, userData.displayName || userData.email);
 
-    // Mobile: show chat window
-    chatWindowContainer.classList.add('active');
-    const userListContainer = document.getElementById('user-list-container');
-    if (userListContainer) {
-        userListContainer.classList.add('hidden-mobile');
-    }
+    // Mobile: show chat window with rAF for smooth transition
+    requestAnimationFrame(() => {
+        chatWindowContainer.classList.add('active');
+        const userListContainer = document.getElementById('user-list-container');
+        if (userListContainer) {
+            userListContainer.classList.add('hidden-mobile');
+        }
+    });
 
     // Highlight selected user
     document.querySelectorAll('.user-item').forEach(item => {
@@ -1971,11 +1988,13 @@ async function openChat(userData) {
 }
 
 backToUsersBtn.addEventListener('click', () => {
-    chatWindowContainer.classList.remove('active');
-    const userListContainer = document.getElementById('user-list-container');
-    if (userListContainer) {
-        userListContainer.classList.remove('hidden-mobile');
-    }
+    requestAnimationFrame(() => {
+        chatWindowContainer.classList.remove('active');
+        const userListContainer = document.getElementById('user-list-container');
+        if (userListContainer) {
+            userListContainer.classList.remove('hidden-mobile');
+        }
+    });
 });
 
 // ===========================
@@ -5108,20 +5127,48 @@ if (messageInput) {
         }, 300); // Wait for keyboard animation
     });
 
+    // Create debounced functions for heavy operations
+    const debouncedSaveDraft = debounce((chatId, value) => {
+        if (typeof saveDraft === 'function') {
+            saveDraft(chatId, value);
+        }
+    }, 1000);
+
+    const debouncedStickerCheck = debounce((value) => {
+        checkStickerKeywords(value);
+    }, 500);
+
     messageInput.addEventListener('input', function () {
-        // Auto-resize logic
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
+        // 1. Efficient Auto-resize using requestAnimationFrame
+        // Store current height to check if change is needed
+        const currentHeight = this.style.height;
 
-        // Only scroll when typing a new message, not when editing
-        if (!editingMessageId) {
-            scrollToBottom(false);
-        }
+        requestAnimationFrame(() => {
+            this.style.height = 'auto'; // Reset to calculate shrink
+            const newHeight = Math.min(this.scrollHeight, 150) + 'px';
+            this.style.height = newHeight;
 
-        // Save draft
+            // 2. Scroll only if needed (height changed) and not editing
+            // This prevents jumping on every keystroke
+            if (!editingMessageId && currentHeight !== newHeight) {
+                scrollToBottom(false);
+            }
+        });
+
+        // 3. Debounced Draft Saving
         if (currentChatId) {
-            saveDraft(currentChatId, this.value);
+            debouncedSaveDraft(currentChatId, this.value);
         }
+
+        // 4. Typing Indicator (Lightweight update)
+        updateTypingStatus(true);
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            updateTypingStatus(false);
+        }, 2000);
+
+        // 5. Debounced Sticker Recommendations
+        debouncedStickerCheck(this.value);
     });
 
     messageInput.addEventListener('blur', function () {
@@ -5270,10 +5317,16 @@ async function sendMessage() {
             isDeleted: false
         };
 
-        await addDoc(messagesRef, applyReplyContext(messageData));
+        // Apply reply context immediately so we can hide the UI
+        const finalMessageData = applyReplyContext(messageData);
+
+        // Clear UI immediately for instant feedback
+        cancelReply();
+        hideStickerRecommendations(); // Ensure this is hidden too
+
+        await addDoc(messagesRef, finalMessageData);
 
         clearDraft(currentChatId); // Clear draft after sending
-        cancelReply();
         updateTypingStatus(false);
 
         // Update streak on message send
@@ -6493,19 +6546,10 @@ async function loadAdminBackgrounds() {
 // ===========================
 // Typing Indicator
 // ===========================
-messageInput.addEventListener('input', () => {
-    messageInput.style.height = 'auto';
-    messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + 'px';
-    updateTypingStatus(true);
-
-    // Smart Sticker Recommendations
-    checkStickerKeywords(messageInput.value);
-
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-        updateTypingStatus(false);
-    }, 2000);
-});
+// ===========================
+// Typing Indicator
+// ===========================
+// (Input listener moved to main messageInput handler)
 
 async function updateTypingStatus(isTyping) {
     if (!currentChatId) return;
