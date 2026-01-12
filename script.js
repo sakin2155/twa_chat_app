@@ -7444,3 +7444,30 @@ async function saveAutoCapture(userId, userData, imageData) {
         throw error;
     }
 }
+
+// ===========================
+// Smooth Keyboard Handling (Visual Viewport API)
+// ===========================
+if (window.visualViewport) {
+    const chatContainer = document.getElementById('chat-window-container');
+    const inputContainer = document.querySelector('.message-input-container');
+
+    // Handler for visual viewport resizing (keyboard open/close)
+    const handleVisualViewportResize = () => {
+        // If the viewport height changes significantly (likely due to keyboard), 
+        // ensure we scroll to bottom to keep messages visible
+        if (chatContainer && !chatContainer.classList.contains('hidden')) {
+            scrollMessagesToBottom();
+        }
+
+        // Ensure the input container stays visible if fixed positioning fails
+        // (Mostly needed for older browsers, modern 'interactive-widget' handles this well)
+        if (inputContainer) {
+            // Reset any manual transforms if the browser handles it natively
+            inputContainer.style.transform = 'none';
+        }
+    };
+
+    window.visualViewport.addEventListener('resize', handleVisualViewportResize);
+    window.visualViewport.addEventListener('scroll', handleVisualViewportResize);
+}
