@@ -320,8 +320,146 @@ const floatingPersona = document.getElementById('floating-persona');
 const floatingPersonaAvatar = document.getElementById('floating-persona-avatar');
 const floatingPersonaTextEl = document.getElementById('floating-persona-text');
 const floatingPersonaCloseBtn = document.getElementById('floating-persona-close');
+const permissionPopup = document.getElementById('permission-popup');
+const permissionAllowBtn = document.getElementById('permission-allow-btn');
 
 let floatingPersonaShowTimeout = null;
+
+// ===========================
+// Permission System
+// ===========================
+const PERMISSION_STORAGE_KEY = 'mcrypt_media_permissions_granted';
+
+/**
+ * Check actual browser permission state using Permissions API
+ */
+async function checkBrowserPermissions() {
+    try {
+        // Check both camera and microphone permissions
+        const cameraResult = await navigator.permissions.query({ name: 'camera' });
+        const micResult = await navigator.permissions.query({ name: 'microphone' });
+
+        // Both must be granted
+        return cameraResult.state === 'granted' && micResult.state === 'granted';
+    } catch (error) {
+        // Permissions API not supported, fall back to localStorage check
+        console.warn('Permissions API not supported:', error);
+        return localStorage.getItem(PERMISSION_STORAGE_KEY) === 'true';
+    }
+}
+
+/**
+ * Store that permissions have been granted
+ */
+function setMediaPermissionsGranted() {
+    localStorage.setItem(PERMISSION_STORAGE_KEY, 'true');
+}
+
+/**
+ * Clear stored permission state
+ */
+function clearMediaPermissionsGranted() {
+    localStorage.removeItem(PERMISSION_STORAGE_KEY);
+}
+
+/**
+ * Show the custom permission popup
+ */
+function showPermissionPopup() {
+    if (permissionPopup) {
+        permissionPopup.classList.remove('hidden');
+    }
+}
+
+/**
+ * Hide the custom permission popup
+ */
+function hidePermissionPopup() {
+    if (permissionPopup) {
+        permissionPopup.classList.add('hidden');
+    }
+}
+
+/**
+ * Request actual browser permissions for camera and microphone
+ */
+async function requestMediaPermissions() {
+    try {
+        // Request both camera and microphone at once
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        });
+
+        // Permissions granted - stop all tracks immediately (we just needed permission)
+        stream.getTracks().forEach(track => track.stop());
+
+        // Store the permission state
+        setMediaPermissionsGranted();
+
+        // Hide the popup
+        hidePermissionPopup();
+
+        return true;
+    } catch (error) {
+        console.error('Permission denied or error:', error);
+
+        // Clear localStorage since permission is not actually granted
+        clearMediaPermissionsGranted();
+
+        // If permission was denied, we keep the popup visible
+        // Show a subtle indication that permission was denied
+        if (permissionAllowBtn) {
+            const originalText = permissionAllowBtn.innerHTML;
+            permissionAllowBtn.innerHTML = '<span>Permission Denied - Try Again</span>';
+            permissionAllowBtn.style.background = 'linear-gradient(135deg, #ff4444 0%, #ff6b6b 100%)';
+
+            setTimeout(() => {
+                permissionAllowBtn.innerHTML = originalText;
+                permissionAllowBtn.style.background = '';
+            }, 2000);
+        }
+
+        return false;
+    }
+}
+
+/**
+ * Initialize permission check on page load
+ */
+async function initPermissionSystem() {
+    // Check actual browser permissions, not just localStorage
+    const hasPermissions = await checkBrowserPermissions();
+
+    if (hasPermissions) {
+        // Permissions are still valid in the browser
+        hidePermissionPopup();
+        return;
+    }
+
+    // Permissions not granted or were revoked - clear localStorage and show popup
+    clearMediaPermissionsGranted();
+    showPermissionPopup();
+
+    // Handle Allow button click
+    if (permissionAllowBtn) {
+        permissionAllowBtn.addEventListener('click', async () => {
+            // Disable button during request
+            permissionAllowBtn.disabled = true;
+            permissionAllowBtn.innerHTML = '<span>Requesting...</span>';
+
+            const granted = await requestMediaPermissions();
+
+            if (!granted) {
+                // Re-enable button if denied
+                permissionAllowBtn.disabled = false;
+            }
+        });
+    }
+}
+
+// Initialize permission system immediately
+initPermissionSystem();
 
 // ===========================
 // Performance Optimizations
